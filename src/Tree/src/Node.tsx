@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import { FC, useMemo, useState, memo } from 'react';
 import { NodeProps } from '..';
-import { useMounted } from '../../utils/lifecycle';
+import { useMounted, useUnmounted } from '../../utils/lifecycle';
 import { Checkbox } from '../../checkbox/Checkbox';
 import { Spinner } from './components/Spinner';
 import { useSetState } from './hooks/useSetState';
@@ -13,11 +13,11 @@ const LIST_TRANSISTION_TIME = 200;
 
 export const Node: FC<NodeProps> = memo((props) => {
 
-  const { getNode, registerNode, onNodeClick, onNodeExpand } = useTreeContext();
+  const { getNode, registerNode, onNodeClick } = useTreeContext();
 
   const [state, setState] = useSetState(getNode(props.path));
 
-  const [expanded, setExpand] = useState(state.expanded || false);
+  const [expanded, setExpand] = useState(false);
   const [listState, setListState] = useState("idle");
 
   const expand = (expand?: boolean) => {
@@ -41,9 +41,9 @@ export const Node: FC<NodeProps> = memo((props) => {
       update = update(state);
     }
 
-    if (typeof update.expanded === "boolean") {
+    if (typeof update.tree.expanded === "boolean") {
       // expande | collapse node
-      expand(update.expanded);
+      expand(update.tree.expanded);
     }
 
     setState((prev) => ({ ...prev, ...update }));
@@ -52,7 +52,7 @@ export const Node: FC<NodeProps> = memo((props) => {
 
   const onExpand = (expanded?: boolean) => {
     const node = getNode(state.path);
-    expanded = expanded !== undefined ? expanded : !node.expanded;
+    expanded = expanded !== undefined ? expanded : !node.tree.expanded;
     node.update({ expanded })
   }
 
@@ -68,10 +68,16 @@ export const Node: FC<NodeProps> = memo((props) => {
   }
 
   useMounted(() => {
-    if (state.path === "/Home") {
-      console.log("home mounted", state)
+
+
+    if (getNode(props.path).expanded?.tree) {
+      expand(true)
     }
     registerNode("tree", state.path, updateNode)
+  })
+
+  useUnmounted(() => {
+    registerNode("tree", state.path);
   })
 
   const nodeClass = useMemo(() => {

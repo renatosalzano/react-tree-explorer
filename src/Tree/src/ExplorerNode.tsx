@@ -101,7 +101,7 @@ const Node: FC<ExplorerNode> = ({ breadcrumbItem, ...props }) => {
       update = update(state);
     }
 
-    if (update.expanded) {
+    if (update.expanded?.explorer) {
 
       selectNode(update);
     }
@@ -134,7 +134,7 @@ const Node: FC<ExplorerNode> = ({ breadcrumbItem, ...props }) => {
   }
 
   useMounted(() => {
-    setNode(state.path, { expanded: false });
+    setNode(state.path, { expanded: { explorer: false } });
     registerNode("explorer", state.path, updateNode);
   })
 

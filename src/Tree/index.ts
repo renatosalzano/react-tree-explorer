@@ -21,7 +21,7 @@ type TreeItem = {
   readonly?: boolean;
   className?: string;
   expandable?: boolean;
-  selfExpand?: boolean | { explorer: boolean, tree: boolean };
+  selfExpand?: boolean;
   children?: TreeItem[];
   data?: { [key: string]: unknown };
 }
@@ -51,10 +51,13 @@ type NodeUpdate = TreeItem & {
   expanded?: boolean;
 }
 
-type NodeProps = Omit<NodeUpdate, "children" | "selfExpand"> & {
+type ExpandNode = { explorer: boolean, tree: boolean };
+
+type NodeProps = Omit<NodeUpdate, "children" | "selfExpand" | "expanded"> & {
   path: string;
   type: "branch" | "item";
-  selfExpand?: { explorer: boolean, tree: boolean };
+  tree: { expanded?: boolean; selfExpand?: boolean; }
+  explorer: { expanded?: boolean; selfExpand?: boolean; }
   isRoot?: boolean;
   children: NodeProps[];
   nestedIndex: number;

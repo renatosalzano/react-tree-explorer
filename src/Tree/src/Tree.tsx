@@ -81,13 +81,17 @@ const Provider: FC<
     return (
       <TreeStateContext.Provider value={value}>
         {children}
+
+        <Button onClick={tree.log.bind(tree)}>
+          test button
+        </Button>
       </TreeStateContext.Provider>
     )
   }
 
 const Tree: FC<TreeProps> = (props) => {
 
-  const [view, setView] = useState<"tree" | "folder">(props.view || "folder");
+  const [view, setView] = useState<"tree" | "folder">(props.view || "tree");
 
   const newNode = () => {
     /* if (tree.active) {
@@ -109,9 +113,6 @@ const Tree: FC<TreeProps> = (props) => {
     <div className='tree-container'>
       <div className="tree-header">
         <div className="view-controls">
-          <Button>
-            test button
-          </Button>
           <Button
             label='tree-view'
             active={view === "tree"}
