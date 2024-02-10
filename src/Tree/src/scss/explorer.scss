@@ -1,0 +1,33 @@
+.tree--explorer {
+  .tree--explorer-header {
+    .explorer-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 16px;
+      margin-bottom: 8px;
+
+      .breadcrumb--node {
+        .tree-element {
+          padding: 0 4px;
+        }
+      }
+
+      .breadcrumb--separator {
+        display: block;
+      }
+
+    }
+
+  }
+}
+
+.folder-node {
+  display: flex;
+  flex-direction: column;
+
+  .node-breadcrumb {
+    display: flex;
+  }
+
+}
