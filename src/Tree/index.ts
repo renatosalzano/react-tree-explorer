@@ -53,15 +53,15 @@ type NodeUpdate = TreeItem & {
 
 type ExpandNode = { explorer: boolean, tree: boolean };
 
-type NodeProps = Omit<NodeUpdate, "children" | "selfExpand" | "expanded"> & {
+type NodeProps = Omit<NodeUpdate, "children" | "selfExpand"> & {
   path: string;
   type: "branch" | "item";
-  tree: { expanded?: boolean; selfExpand?: boolean; }
-  explorer: { expanded?: boolean; selfExpand?: boolean; }
+  selfExpand?: { explorer: boolean; tree: boolean; }
   isRoot?: boolean;
   children: NodeProps[];
   nestedIndex: number;
   update(update: any): any;
+  open(): void;
 }
 
 export type { TreeProps, TreeEvents, TreeItem, NodeProps };

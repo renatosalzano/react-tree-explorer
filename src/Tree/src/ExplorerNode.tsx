@@ -13,6 +13,8 @@ export const ExplorerNode: FC<NodeProps> = (props) => {
 
   const updateNode = (update: any) => {
 
+    console.log('folder')
+
     if (typeof update === "function") {
       update = update(state);
     }
@@ -22,7 +24,6 @@ export const ExplorerNode: FC<NodeProps> = (props) => {
   }
 
   useMounted(() => {
-    setNode(state.path, { expanded: false });
     registerNode("explorer", state.path, updateNode);
   })
 
@@ -85,6 +86,7 @@ type ExplorerNode = NodeProps & {
 const Node: FC<ExplorerNode> = ({ breadcrumbItem, ...props }) => {
 
   const {
+    currentPath,
     getNode,
     setNode,
     registerNode,
@@ -101,8 +103,9 @@ const Node: FC<ExplorerNode> = ({ breadcrumbItem, ...props }) => {
       update = update(state);
     }
 
-    if (update.expanded?.explorer) {
+    console.log(currentPath, state.path)
 
+    if (state.path !== currentPath && update.openNode) {
       selectNode(update);
     }
 
@@ -134,7 +137,6 @@ const Node: FC<ExplorerNode> = ({ breadcrumbItem, ...props }) => {
   }
 
   useMounted(() => {
-    setNode(state.path, { expanded: { explorer: false } });
     registerNode("explorer", state.path, updateNode);
   })
 

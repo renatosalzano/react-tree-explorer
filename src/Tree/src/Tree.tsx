@@ -20,9 +20,10 @@ const DEFAULT_ICONS = {
 type TreeContext = Partial<TreeProps> & {
   active?: string;
   view: "tree" | "folder";
-  rootOffset: number,
-  rootNode: NodeProps,
-  currentNode: NodeProps,
+  rootOffset: number;
+  rootNode: NodeProps;
+  currentNode: NodeProps;
+  currentPath: string;
   getNode: TreeState['getNode'];
   setNode: TreeState['setNode'];
   selectNode(node: NodeProps): void;
@@ -51,16 +52,25 @@ const Provider: FC<
 
     const tree = useRef(new TreeState({ root, lock, view, multicheck, defaultIcons })).current;
 
+    const { getNode, setNode, registerNode } = {
+      getNode: tree.getNode.bind(tree),
+      setNode: tree.setNode.bind(tree),
+      registerNode: tree.registerNode.bind(tree)
+    }
+
     const rootNode = useMemo(() => {
       return tree.root as NodeProps;
     }, [])
 
+    // explorer
     const [currentNode, setCurrentNode] = useState(rootNode);
+    const currentPath = useRef(rootNode.path);
 
     const selectNode = (node) => {
       // open node
       /* if (prevNode.current === node.path) return; */
       console.log("select node", node)
+      currentPath.current = node.path;
       setCurrentNode(() => node);
     }
 
@@ -69,9 +79,10 @@ const Provider: FC<
       rootOffset: tree.rootOffset,
       rootNode,
       currentNode,
-      getNode(path, root) { return tree.getNode.bind(tree)(path, root) as NodeProps },
-      setNode(path, update) { tree.setNode.bind(tree)(path, update) },
-      registerNode(...params) { tree.registerNode.bind(tree)(...params) },
+      currentPath: currentPath.current,
+      getNode,
+      setNode,
+      registerNode,
       onNodeClick,
       onNodeCheck,
       onNodeExpand,
@@ -91,7 +102,7 @@ const Provider: FC<
 
 const Tree: FC<TreeProps> = (props) => {
 
-  const [view, setView] = useState<"tree" | "folder">(props.view || "tree");
+  const [view, setView] = useState<"tree" | "folder">(props.view || "folder");
 
   const newNode = () => {
     /* if (tree.active) {

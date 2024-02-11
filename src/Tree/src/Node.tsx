@@ -41,9 +41,9 @@ export const Node: FC<NodeProps> = memo((props) => {
       update = update(state);
     }
 
-    if (typeof update.tree.expanded === "boolean") {
+    if (typeof update.expanded === "boolean") {
       // expande | collapse node
-      expand(update.tree.expanded);
+      expand(update.expanded);
     }
 
     setState((prev) => ({ ...prev, ...update }));
@@ -52,7 +52,7 @@ export const Node: FC<NodeProps> = memo((props) => {
 
   const onExpand = (expanded?: boolean) => {
     const node = getNode(state.path);
-    expanded = expanded !== undefined ? expanded : !node.tree.expanded;
+    expanded = expanded !== undefined ? expanded : !node.expanded;
     node.update({ expanded })
   }
 
@@ -70,7 +70,7 @@ export const Node: FC<NodeProps> = memo((props) => {
   useMounted(() => {
 
 
-    if (getNode(props.path).expanded?.tree) {
+    if (getNode(props.path).expanded) {
       expand(true)
     }
     registerNode("tree", state.path, updateNode)

@@ -5,7 +5,7 @@ export class TreeState {
     path: "/",
     label: "root",
     isRoot: true,
-    children: [] as Node[],
+    children: [] as NodeProps[],
   };
   active = "";
   nodes: { [key: string]: NodeProps } = { '/': this.root };
@@ -45,19 +45,19 @@ export class TreeState {
 
     n.nestedIndex = n.path.split('/').length - 2 - this.rootOffset;
     n.active = false;
-    n.tree = {};
-    n.explorer = {};
 
-    if (node.selfExpand) {
-      n.tree.selfExpand = node.selfExpand;
-      n.explorer.selfExpand = node.selfExpand;
+    if (typeof node.selfExpand === "boolean") {
+      n.selfExpand = {
+        explorer: node.selfExpand,
+        tree: node.selfExpand,
+      }
     }
 
     if (n.children && n.children.length > 0) {
       n.type = "branch";
       n.icon = this.defaultIcons!.branch
       n.children = n.children.map((child) => {
-        const childNode = this.resolveNode(child, n.path);
+        const childNode = this.resolveNode(child as any, n.path);
         this.nodes[childNode.path] = childNode;
         return this.nodes[childNode.path];
       }
@@ -73,7 +73,7 @@ export class TreeState {
   registerNode(
     type: "explorer" | "tree",
     path: string,
-    dispatch?: <T = NodeProps, P = Partial<T>>(update: P | ((prev: T) => T)) => void,
+    dispatch?: <T = NodeProps, P = Partial<T>>(update: P | ((prev: T) => T)) => void
   ) {
 
     if (dispatch) {
@@ -81,6 +81,9 @@ export class TreeState {
 
       // update state fn
       this.nodes[path].update = (update: any) => {
+
+        console.log("update state")
+        let openNode = false;
 
         if (typeof update === 'function') {
           update = update(this.nodes[path]);
@@ -95,10 +98,11 @@ export class TreeState {
           });
         }
 
-        if (typeof update.expanded === "boolean") {
-          update[type] = { expanded: update.expanded }
+        if (type === 'explorer' && update.expanded) {
+          // dont update expanded
+          delete update.expanded;
+          openNode = true;
         }
-
 
         for (const k in update) {
           this.nodes[path][k] = update[k];
@@ -111,17 +115,18 @@ export class TreeState {
           this.active = path;
         }
 
-        dispatch(() => ({ ...this.nodes[path] }));
+        dispatch(() => ({ ...this.nodes[path], openNode }));
 
         return this.nodes[path];
       };
 
-      if (this.nodes[path][type].selfExpand) {
+      if (this.nodes[path].selfExpand) {
         if (type === "explorer") {
-          this.nodes[path][type].selfExpand = false;
+          this.nodes[path].selfExpand![type] = false;
         }
         this.nodes[path].update({ expanded: true, active: true });
       }
+
     } else {
       // unmounted node
 
