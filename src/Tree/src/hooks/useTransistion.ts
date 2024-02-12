@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useState } from "react"
 
 type Status = "idle" | "start" | "end" | "start-0" | "end-0";
 type Dispatch = (update?: boolean | ((prev: boolean) => boolean), noTransistion?: boolean) => void;

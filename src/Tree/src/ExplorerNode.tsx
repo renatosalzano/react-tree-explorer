@@ -51,6 +51,8 @@ const Breadcrumb: FC<NodeProps> = (currentNode) => {
     if (currentNode) {
       if (currentNode.isRoot) return []
 
+      console.log(rootOffset)
+
       const items = currentNode.path.split("/");
       items.pop();
 

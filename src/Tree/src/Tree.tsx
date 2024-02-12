@@ -1,9 +1,8 @@
-import React, { FC, Fragment, ReactElement, ReactNode, createContext, createElement, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Dispatch, FC, Fragment, MutableRefObject, ReactElement, ReactNode, SetStateAction, createContext, createElement, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { TreeProps, TreeItem, NodeProps } from '../index';
 
 
 import { Node } from './Node';
-import { useMounted } from '../../utils/lifecycle';
 import { TreeState } from './treeState';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolder, faFolderTree, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
@@ -17,13 +16,16 @@ const DEFAULT_ICONS = {
 
 }
 
-type TreeContext = Partial<TreeProps> & {
+type TreeView = "tree" | "folder"
+
+type TreeContext = Partial<Omit<TreeProps, "view">> & {
   active?: string;
-  view: "tree" | "folder";
+  view: MutableRefObject<TreeView>;
   rootOffset: number;
   rootNode: NodeProps;
   currentNode: NodeProps;
   currentPath: string;
+  setView(update: TreeView | ((prev: TreeView) => TreeView)): void;
   getNode: TreeState['getNode'];
   setNode: TreeState['setNode'];
   selectNode(node: NodeProps): void;
@@ -34,73 +36,39 @@ const TreeStateContext = createContext<TreeContext>({} as TreeContext);
 
 export const useTreeContext = () => useContext(TreeStateContext);
 
-const Provider: FC<
-  TreeProps & {
-    children: ReactNode;
-    view: "tree" | "folder";
-  }> = ({
-    view,
-    root = [],
-    lock,
-    defaultIcons = DEFAULT_ICONS,
-    multicheck = true,
-    onNodeClick,
-    onNodeExpand,
-    onNodeCheck,
-    children
-  }) => {
+const Tree: FC<TreeProps> = ({
+  view = "tree",
+  root = [],
+  lock,
+  defaultIcons = DEFAULT_ICONS,
+  multicheck = true,
+  onNodeClick,
+  onNodeExpand,
+  onNodeCheck,
+}) => {
 
-    const tree = useRef(new TreeState({ root, lock, view, multicheck, defaultIcons })).current;
+  const tree = useRef(new TreeState({ root, lock, view, multicheck, defaultIcons })).current;
 
-    const { getNode, setNode, registerNode } = {
-      getNode: tree.getNode.bind(tree),
-      setNode: tree.setNode.bind(tree),
-      registerNode: tree.registerNode.bind(tree)
-    }
-
-    const rootNode = useMemo(() => {
-      return tree.root as NodeProps;
-    }, [])
-
-    // explorer
-    const [currentNode, setCurrentNode] = useState(rootNode);
-    const currentPath = useRef(rootNode.path);
-
-    const selectNode = (node) => {
-      // open node
-      /* if (prevNode.current === node.path) return; */
-      setCurrentNode(() => node);
-    }
-
-    const value: TreeContext = {
-      view,
-      rootOffset: tree.rootOffset,
-      rootNode,
-      currentNode,
-      currentPath: currentPath.current,
-      getNode,
-      setNode,
-      registerNode,
-      onNodeClick,
-      onNodeCheck,
-      onNodeExpand,
-      selectNode,
-    }
-
-    return (
-      <TreeStateContext.Provider value={value}>
-        {children}
-
-        <Button onClick={tree.log.bind(tree)}>
-          test button
-        </Button>
-      </TreeStateContext.Provider>
-    )
+  const { getNode, setNode, registerNode } = {
+    getNode: tree.getNode.bind(tree),
+    setNode: tree.setNode.bind(tree),
+    registerNode: tree.registerNode.bind(tree)
   }
 
-const Tree: FC<TreeProps> = (props) => {
+  // TREE VIEW
 
-  const [view, setView] = useState<"tree" | "folder">(props.view || "folder");
+  const [treeView, setTreeView] = useState<TreeView>(view);
+  const _treeView = useRef(treeView);
+
+  const setView = (update: TreeView | ((prev: TreeView) => TreeView)) => {
+    if (typeof update === 'function') {
+      update = update(_treeView.current);
+    }
+    _treeView.current = update;
+    setTreeView(update);
+  }
+
+
 
   const newNode = () => {
     /* if (tree.active) {
@@ -118,60 +86,89 @@ const Tree: FC<TreeProps> = (props) => {
     } */
   }
 
+  const rootNode = useMemo(() => {
+
+    let _rootNode = tree.root as NodeProps;
+
+    if (lock && getNode(lock)?.path) {
+      _rootNode = getNode(lock);
+    }
+
+    console.log("_rootNode", _rootNode);
+
+    return _rootNode;
+  }, [lock]);
+
+  // explorer
+  const [currentNode, setCurrentNode] = useState(rootNode);
+  const currentPath = useRef(rootNode.path);
+
+  const selectNode = (node) => {
+    // open node
+    /* if (prevNode.current === node.path) return; */
+    setCurrentNode(() => node);
+  }
+
+  const value: TreeContext = {
+    view: _treeView,
+    setView,
+    rootOffset: tree.rootOffset,
+    rootNode,
+    currentNode,
+    currentPath: currentPath.current,
+    getNode,
+    setNode,
+    registerNode,
+    onNodeClick,
+    onNodeCheck,
+    onNodeExpand,
+    selectNode,
+  }
+
   return (
-    <div className='tree-container'>
-      <div className="tree-header">
-        <div className="view-controls">
-          <Button
-            label='tree-view'
-            active={view === "tree"}
-            onClick={() => setView("tree")}>
-            <FontAwesomeIcon icon={faFolderTree} />
-          </Button>
-          <Button
-            label='folder-view'
-            active={view === "folder"}
-            onClick={() => setView("folder")}>
-            <FontAwesomeIcon icon={faFolder} />
-          </Button>
-        </div>
-      </div>
-      <Provider  {...props} view={view}>
-        {view === "tree"
-          ? <RootList />
-          : <Explorer />
+    <TreeStateContext.Provider value={value}>
+      <div className='tree-container'>
+        <Header />
+        {treeView === "tree"
+          ? (
+            <Node key={rootNode.path} {...rootNode} isRoot />
+          ) : (
+            <div className="tree--explorer">
+              <ExplorerNode key={currentNode.path} {...currentNode} />
+            </div>
+          )
         }
-      </Provider>
+        <Button onClick={tree.log.bind(tree)}>
+          test button
+        </Button>
+      </div>
+    </TreeStateContext.Provider>
+  )
+}
+
+const Header: FC = () => {
+
+  const { view, setView } = useTreeContext();
+
+  return (
+    <div className="tree-header">
+      <div className="view-controls">
+        <Button
+          label='tree-view'
+          active={view.current === "tree"}
+          onClick={() => setView("tree")}>
+          <FontAwesomeIcon icon={faFolderTree} />
+        </Button>
+        <Button
+          label='folder-view'
+          active={view.current === "folder"}
+          onClick={() => setView("folder")}>
+          <FontAwesomeIcon icon={faFolder} />
+        </Button>
+      </div>
     </div>
   )
 }
 
-
-const RootList: FC = () => {
-
-  const { rootNode } = useTreeContext();
-
-  return (
-    <ul className={`tree--root-list list-unstyled`}>
-      {rootNode.children.map((node) => {
-        return (
-          <Node key={node.path} {...node} />
-        )
-      })
-      }
-    </ul>
-  )
-}
-
-const Explorer: FC = () => {
-
-  const { currentNode } = useTreeContext();
-
-  return (
-    <div className="tree--explorer">
-      <ExplorerNode key={currentNode.path} {...currentNode} />
-    </div>
-  )
-}
 
 export { Tree }

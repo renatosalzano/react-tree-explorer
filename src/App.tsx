@@ -2,6 +2,31 @@ import { Tree, TreeEvents } from './Tree';
 import { treeData, buildTree } from './_data/faketree';
 import { useMounted } from './utils/lifecycle';
 
+const Root = {
+  label: "news",
+  children: [
+    {
+      label: "2020", children: [
+        {
+          label: "01", children: [
+            {
+              label: "15", children: [
+                { label: "article-1" },
+                { label: "article-2" },
+                { label: "article-3" }
+
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    { label: "article-1" },
+    { label: "article-2" },
+    { label: "article-3" }
+  ]
+}
+
 
 function App() {
 
@@ -20,7 +45,7 @@ function App() {
     <div className="App">
       <main>
         <aside>
-          <Tree root={treeData} lock='Home/Folder' />
+          <Tree root={Root} />
 
         </aside>
         <section>

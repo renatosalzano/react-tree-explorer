@@ -4,7 +4,7 @@ import { TreeState } from "./src/treeState";
 
 type TreeProps = TreeEvents & {
   view?: "tree" | "folder";
-  root: TreeItem[];
+  root: TreeItem[] | TreeItem;
   lock?: string;
   multicheck?: boolean;
   defaultIcons?: {

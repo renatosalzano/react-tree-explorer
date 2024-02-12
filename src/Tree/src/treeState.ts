@@ -1,14 +1,9 @@
 import { TreeItem, NodeProps, TreeProps } from "../index";
 
 export class TreeState {
-  root = {
-    path: "/",
-    label: "root",
-    isRoot: true,
-    children: [] as NodeProps[],
-  };
+  root: NodeProps;
   active = "";
-  nodes: { [key: string]: NodeProps } = { '/': this.root };
+  nodes: { [key: string]: NodeProps } = {};
 
   rootOffset = 0;
   checked: string[] = [];
@@ -16,35 +11,55 @@ export class TreeState {
   defaultIcons: TreeProps['defaultIcons'];
 
   constructor({
-    root = [],
-    lock,
+    root,
+    lock = "",
     multicheck = false,
     defaultIcons,
   }: TreeProps) {
+
     this.defaultIcons = defaultIcons;
     this.multicheck = multicheck;
-    // init nodes
-    this.root.children = root.map((child) => {
-      const node = this.resolveNode(child, "/");
-      this.nodes[node.path] = node;
-      return this.nodes[node.path];
-    });
 
-    if (lock && this.nodes[lock]) {
-      this.rootOffset += lock.split('/').length - 1;
+
+    if (root instanceof Array) {
+      // init root
+      this.root = {
+        label: "",
+        path: "/",
+        nestedIndex: 0,
+        children: root.map((child) => {
+          const n = this.resolveNode(child, "/");
+          this.nodes[n.path] = n;
+          return this.nodes[n.path];
+        })
+      } as NodeProps;
+    } else {
+      // custom root
+      this.root = this.resolveNode(root);
+      this.nodes[this.root.path] = this.root;
     }
 
+    console.log("this root", this)
+
+
+    if (lock && this.getNode(lock)) {
+      this.rootOffset = lock.split('/').length;
+    }
 
   }
 
   resolveNode(node: TreeItem, parent?: string): NodeProps {
     const n = { ...node } as NodeProps;
 
-    n.path = parent === '/'
-      ? `/${n.label}`
-      : `${parent}/${n.label}`;
+    if (parent) {
+      n.path = `${parent}/${n.label}`
+    } else {
+      // root node
+      n.path = `/${n.label}`;
+      n.isRoot = true;
+    }
 
-    n.nestedIndex = n.path.split('/').length - 2 - this.rootOffset;
+    n.nestedIndex = n.path.split('/').length - 3;
     n.active = false;
 
     if (typeof node.selfExpand === "boolean") {
@@ -84,7 +99,7 @@ export class TreeState {
       // update state fn
       this.nodes[path].update = (update: any) => {
 
-        console.log("update state " + path, update)
+        // console.log("update state " + path, update)
         let openNode = false;
 
         if (typeof update === 'function') {
@@ -118,7 +133,6 @@ export class TreeState {
         }
 
         if (openNode && selectNode) {
-          console.log('select node')
           selectNode(this.nodes[path]);
           return;
         }
@@ -173,20 +187,9 @@ export class TreeState {
     return this.nodes[path];
   }
 
-  getNode(path: string, root?: boolean) {
-    try {
-      if (path[0] !== "/") path = `/${path}`
-      if (root) {
-        if (this.nodes[path]) return this.nodes[path];
-        return this.root as NodeProps;
-      } else if (this.nodes[path]) {
-        return this.nodes[path];
-      }
-
-    } catch (err) {
-      console.error(err)
-    }
-    return {} as NodeProps
+  getNode(path: string) {
+    console.log(path)
+    return this.nodes[path]
   }
 
   setNode(path: string, update: any) {

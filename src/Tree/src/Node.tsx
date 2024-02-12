@@ -1,9 +1,9 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleRight } from '@fortawesome/free-solid-svg-icons';
-import { FC, useMemo, useState, memo } from 'react';
+import { FC, useMemo, memo } from 'react';
 import { NodeProps } from '..';
 import { useMounted, useUnmounted } from '../../utils/lifecycle';
-import { Checkbox } from '../../checkbox/Checkbox';
+// import { Checkbox } from '../../checkbox/Checkbox';
 import { Spinner } from './components/Spinner';
 import { useSetState } from './hooks/useSetState';
 import { useTreeContext } from './Tree';
@@ -14,30 +14,11 @@ const LIST_TRANSISTION_TIME = 200;
 
 export const Node: FC<NodeProps> = memo((props) => {
 
-  const { getNode, registerNode, onNodeClick } = useTreeContext();
+  const { view, getNode, setNode, registerNode, onNodeClick, rootOffset } = useTreeContext();
 
   const [state, setState] = useSetState(getNode(props.path));
 
-  /* const [expanded, setExpand] = useState(false);
-  const [listState, setListState] = useState("idle"); */
   const [expanded, listState, expand] = useTransistion(false);
-
-  console.log(expanded, listState)
-
-  /* const expand = (expand?: boolean) => {
-
-    setListState((p) => {
-      if (p === 'idle' || p === "close" || expand) {
-        setExpand(true);
-        return "open"
-      } else {
-        // plus 10 because js is more fast than css transistion
-        setTimeout(() => setExpand(false), LIST_TRANSISTION_TIME + 10);
-        return "close"
-      }
-    });
-
-  } */
 
   const updateNode = (update: any) => {
 
@@ -74,6 +55,7 @@ export const Node: FC<NodeProps> = memo((props) => {
   useMounted(() => {
 
     if (getNode(props.path).expanded) {
+      // expand node
       expand(true, true);
     }
     registerNode("tree", state.path, updateNode)
@@ -81,6 +63,9 @@ export const Node: FC<NodeProps> = memo((props) => {
 
   useUnmounted(() => {
     registerNode("tree", state.path);
+    if (view.current === "tree" && state.type === "branch") {
+      setNode(state.path, { expanded: false });
+    }
   })
 
   const nodeClass = useMemo(() => {
@@ -94,11 +79,36 @@ export const Node: FC<NodeProps> = memo((props) => {
 
   const attributes: any = useMemo(() => {
     return {
-      '--nested-index': `${state.nestedIndex}`,
+      '--nested-index': `${state.nestedIndex - rootOffset}`,
       '--items-count': state.children ? state.children.length : 0,
       '--list-transistion-time': LIST_TRANSISTION_TIME + 'ms'
     }
   }, [state.nestedIndex, state.children])
+
+
+  if (props.isRoot) return (
+    <div className='root-node'>
+      <div className="tree-element">
+        <Button
+          type='button'
+          className="node-label"
+          onClick={onClick}>
+          {(state.icon) && state.icon}
+          {state.label}
+        </Button>
+        {state.active && <div className='tree-active' />}
+      </div>
+      <ul
+        className={`node-list list-unstyled`}
+        data-list-state={listState}>
+        <div className='node-list-line' />
+        {state.children.map((node) => (
+          <Node key={node.path} {...node} />
+        ))}
+      </ul>
+    </div>
+
+  )
 
   return (
     <li
