@@ -51,13 +51,11 @@ const Breadcrumb: FC<NodeProps> = (currentNode) => {
     if (currentNode) {
       if (currentNode.isRoot) return []
 
-      console.log(rootOffset)
-
-      const items = currentNode.path.split("/");
-      items.pop();
+      let items = currentNode.path.split("/");
+      items = items.slice(1, items.length - 1);
 
       let paths = items.reduce((prev, curr, i) => {
-        const path = prev.length > 0 ? `${prev[i - 1]}/${curr}` : `${curr}`;
+        const path = prev.length > 0 ? `${prev[i - 1]}/${curr}` : `/${curr}`;
         prev.push(path)
         return prev
       }, [] as any[]);
@@ -70,6 +68,8 @@ const Breadcrumb: FC<NodeProps> = (currentNode) => {
     }
     return []
   }, [currentNode]);
+
+
 
   return (
     <ul className="node-breadcrumb list-unstyled">
