@@ -88,13 +88,17 @@ $item-size: 28px;
     transition: all var(--list-transistion-time) ease-out;
     z-index: 1;
 
-    &[data-list-state="open"] {
+    &[data-list-state="start-0"] {
+      max-height: unset;
+    }
+
+    &[data-list-state="start"] {
       animation-name: open-list;
       animation-duration: var(--list-transistion-time);
       animation-fill-mode: forwards;
     }
 
-    &[data-list-state="close"] {
+    &[data-list-state="end"] {
       animation-name: close-list;
       animation-duration: var(--list-transistion-time);
       animation-fill-mode: forwards;

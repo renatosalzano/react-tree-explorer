@@ -8,6 +8,7 @@ import { Spinner } from './components/Spinner';
 import { useSetState } from './hooks/useSetState';
 import { useTreeContext } from './Tree';
 import { Button } from './components';
+import { useTransistion } from './hooks/useTransistion';
 
 const LIST_TRANSISTION_TIME = 200;
 
@@ -17,10 +18,13 @@ export const Node: FC<NodeProps> = memo((props) => {
 
   const [state, setState] = useSetState(getNode(props.path));
 
-  const [expanded, setExpand] = useState(false);
-  const [listState, setListState] = useState("idle");
+  /* const [expanded, setExpand] = useState(false);
+  const [listState, setListState] = useState("idle"); */
+  const [expanded, listState, expand] = useTransistion(false);
 
-  const expand = (expand?: boolean) => {
+  console.log(expanded, listState)
+
+  /* const expand = (expand?: boolean) => {
 
     setListState((p) => {
       if (p === 'idle' || p === "close" || expand) {
@@ -33,7 +37,7 @@ export const Node: FC<NodeProps> = memo((props) => {
       }
     });
 
-  }
+  } */
 
   const updateNode = (update: any) => {
 
@@ -69,9 +73,8 @@ export const Node: FC<NodeProps> = memo((props) => {
 
   useMounted(() => {
 
-
     if (getNode(props.path).expanded) {
-      expand(true)
+      expand(true, true);
     }
     registerNode("tree", state.path, updateNode)
   })
