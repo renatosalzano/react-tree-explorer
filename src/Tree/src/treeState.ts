@@ -9,6 +9,7 @@ export class TreeState {
   };
   active = "";
   nodes: { [key: string]: NodeProps } = { '/': this.root };
+
   rootOffset = 0;
   checked: string[] = [];
   multicheck = false;
@@ -73,7 +74,8 @@ export class TreeState {
   registerNode(
     type: "explorer" | "tree",
     path: string,
-    dispatch?: <T = NodeProps, P = Partial<T>>(update: P | ((prev: T) => T)) => void
+    dispatch?: <T = NodeProps, P = Partial<T>>(update: P | ((prev: T) => T)) => void,
+    selectNode?: (node: any) => void
   ) {
 
     if (dispatch) {
@@ -82,7 +84,7 @@ export class TreeState {
       // update state fn
       this.nodes[path].update = (update: any) => {
 
-        console.log("update state")
+        console.log("update state " + path, update)
         let openNode = false;
 
         if (typeof update === 'function') {
@@ -115,15 +117,19 @@ export class TreeState {
           this.active = path;
         }
 
+        if (openNode && selectNode) {
+          console.log('select node')
+          selectNode(this.nodes[path]);
+          return;
+        }
+
         dispatch(() => ({ ...this.nodes[path], openNode }));
 
         return this.nodes[path];
       };
 
-      if (this.nodes[path].selfExpand) {
-        if (type === "explorer") {
-          this.nodes[path].selfExpand![type] = false;
-        }
+      if (this.nodes[path].selfExpand?.[type]) {
+        this.nodes[path].selfExpand![type] = false;
         this.nodes[path].update({ expanded: true, active: true });
       }
 

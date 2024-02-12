@@ -69,8 +69,6 @@ const Provider: FC<
     const selectNode = (node) => {
       // open node
       /* if (prevNode.current === node.path) return; */
-      console.log("select node", node)
-      currentPath.current = node.path;
       setCurrentNode(() => node);
     }
 

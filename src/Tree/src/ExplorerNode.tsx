@@ -86,9 +86,7 @@ type ExplorerNode = NodeProps & {
 const Node: FC<ExplorerNode> = ({ breadcrumbItem, ...props }) => {
 
   const {
-    currentPath,
     getNode,
-    setNode,
     registerNode,
     selectNode,
     onNodeClick,
@@ -101,12 +99,6 @@ const Node: FC<ExplorerNode> = ({ breadcrumbItem, ...props }) => {
 
     if (typeof update === "function") {
       update = update(state);
-    }
-
-    console.log(currentPath, state.path)
-
-    if (state.path !== currentPath && update.openNode) {
-      selectNode(update);
     }
 
     setState((p) => ({ ...p, ...update }))
@@ -137,7 +129,7 @@ const Node: FC<ExplorerNode> = ({ breadcrumbItem, ...props }) => {
   }
 
   useMounted(() => {
-    registerNode("explorer", state.path, updateNode);
+    registerNode("explorer", state.path, updateNode, selectNode);
   })
 
   useUnmounted(() => {
