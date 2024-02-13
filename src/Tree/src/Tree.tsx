@@ -49,9 +49,10 @@ const Tree: FC<TreeProps> = ({
 
   const tree = useRef(new TreeState({ root, lock, view, multicheck, defaultIcons })).current;
 
-  const { getNode, setNode, registerNode } = {
+  const { getNode, setNode, registerNode, onChangeView } = {
     getNode: tree.getNode.bind(tree),
     setNode: tree.setNode.bind(tree),
+    onChangeView: tree.onChangeView.bind(tree),
     registerNode: tree.registerNode.bind(tree)
   }
 
@@ -64,6 +65,9 @@ const Tree: FC<TreeProps> = ({
     if (typeof update === 'function') {
       update = update(_treeView.current);
     }
+    // prev view
+    onChangeView(_treeView.current);
+
     _treeView.current = update;
     setTreeView(update);
   }

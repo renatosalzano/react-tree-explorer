@@ -3,6 +3,10 @@ import { TreeItem, NodeProps, TreeProps } from "../index";
 export class TreeState {
   root: NodeProps;
   active = "";
+  activeNodes = {
+    tree: "",
+    folder: "",
+  };
   nodes: { [key: string]: NodeProps } = {};
 
   rootOffset = 0;
@@ -87,7 +91,7 @@ export class TreeState {
   }
 
   registerNode(
-    type: "explorer" | "tree",
+    type: "folder" | "tree",
     path: string,
     dispatch?: <T = NodeProps, P = Partial<T>>(update: P | ((prev: T) => T)) => void,
     selectNode?: (node: any) => void
@@ -107,7 +111,7 @@ export class TreeState {
         }
 
         if (update.children) {
-          // TODO add custom callback
+          // TODO add custom callback ?
           update.children = update.children.map((child) => {
             const childNode = this.resolveNode(child, path);
             this.nodes[childNode.path] = childNode;
@@ -115,7 +119,7 @@ export class TreeState {
           });
         }
 
-        if (type === 'explorer' && update.expanded) {
+        if (type === 'folder' && update.expanded) {
           // dont update expanded
           delete update.expanded;
           openNode = true;
@@ -130,6 +134,7 @@ export class TreeState {
             this.nodes[this.active].update({ active: false });
           }
           this.active = path;
+          this.activeNodes[type] = path;
         }
 
         if (openNode && selectNode) {
@@ -183,8 +188,19 @@ export class TreeState {
     console.log(this.checked)
   }
 
-  logNode(path: string) {
-    return this.nodes[path];
+  onChangeView(view: "tree" | "folder") {
+    const other = view === "tree" ? "folder" : "tree";
+    const oldActive = this.activeNodes[view];
+    const currentActive = this.activeNodes[other];
+    this.active = "";
+
+    if (oldActive) {
+      this.setNode(oldActive, { active: false })
+    }
+    if (currentActive) {
+      this.active = currentActive;
+      this.setNode(currentActive, { active: true })
+    }
   }
 
   getNode(path: string) {
@@ -193,11 +209,10 @@ export class TreeState {
   }
 
   setNode(path: string, update: any) {
-    this.nodes[path] = {
-      ...this.nodes[path],
-      ...update
+    if (!this.nodes[path]) return;
+    for (const k in update) {
+      this.nodes[path][k] = update[k]
     }
-
   }
 
   log() {

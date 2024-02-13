@@ -7,7 +7,7 @@ import { useTreeContext } from "./Tree";
 
 export const ExplorerNode: FC<NodeProps> = (props) => {
 
-  const { getNode, setNode, registerNode } = useTreeContext();
+  const { getNode, registerNode } = useTreeContext();
 
   const [state, setState] = useSetState(() => getNode(props.path));
 
@@ -24,7 +24,7 @@ export const ExplorerNode: FC<NodeProps> = (props) => {
   }
 
   useMounted(() => {
-    registerNode("explorer", state.path, updateNode);
+    registerNode("folder", state.path, updateNode);
   })
 
   return (
@@ -131,11 +131,11 @@ const Node: FC<ExplorerNode> = ({ breadcrumbItem, ...props }) => {
   }
 
   useMounted(() => {
-    registerNode("explorer", state.path, updateNode, selectNode);
+    registerNode("folder", state.path, updateNode, selectNode);
   })
 
   useUnmounted(() => {
-    registerNode("explorer", state.path);
+    registerNode("folder", state.path);
   })
 
   switch (true) {
