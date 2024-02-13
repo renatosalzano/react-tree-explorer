@@ -43,7 +43,7 @@ export class TreeState {
 
 
     if (lock && this.getNode(lock)) {
-      this.rootOffset = lock.split('/').length;
+      this.rootOffset = lock.split('/').length - 2;
     }
 
   }

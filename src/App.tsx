@@ -45,7 +45,7 @@ function App() {
     <div className="App">
       <main>
         <aside>
-          <Tree root={Root} />
+          <Tree root={Root} lock='/news/2020/01' />
 
         </aside>
         <section>
