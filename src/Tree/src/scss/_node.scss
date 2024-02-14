@@ -1,16 +1,22 @@
-$item-size: 28px;
-
-@mixin node-label {
+@mixin node-label($center: false) {
   flex: 1;
   display: flex;
+
+  @if $center {
+    justify-content: center;
+  }
+
   gap: 4px;
-  line-height: $item-size;
-  z-index: 1;
+  line-height: $node-size;
   cursor: pointer;
 
+  &:hover {
+    background-color: $primary;
+  }
+
   svg {
-    width: $item-size;
-    height: $item-size;
+    width: $node-size;
+    height: $node-size;
     padding: 2px;
   }
 }
@@ -21,7 +27,7 @@ $item-size: 28px;
 
   .tree-element {
     display: flex;
-    height: $item-size;
+    height: $node-size;
 
     .node-label {
       @include node-label;
@@ -34,24 +40,27 @@ $item-size: 28px;
   .tree-element {
     position: relative;
     display: flex;
-    height: $item-size;
-    padding-left: calc($item-size * var(--nested-index));
+    height: $node-size;
+    padding-left: calc($node-size * var(--nested-index));
+
+    :not(.tree-active) {
+      z-index: 1;
+    }
 
     .tree-active {
       position: absolute;
       inset: 0 0 0 0;
       border-radius: 4px;
-      background-color: rgb(149, 0, 255);
+      background-color: $primary;
       z-index: 0;
     }
 
     .tree-element--cta {
-      width: $item-size;
-      height: $item-size;
+      width: $node-size;
+      height: $node-size;
       padding: 0px;
       border: none;
       background: transparent;
-      z-index: 1;
 
       &.tree-spinner {
         .spinner-icon {
@@ -65,18 +74,7 @@ $item-size: 28px;
     }
 
     .node-label {
-      flex: 1;
-      display: flex;
-      gap: 4px;
-      line-height: $item-size;
-      z-index: 1;
-      cursor: pointer;
-
-      svg {
-        width: $item-size;
-        height: $item-size;
-        padding: 2px;
-      }
+      @include node-label;
     }
   }
 
@@ -107,12 +105,12 @@ $item-size: 28px;
 
     .node-list-line {
       position: absolute;
-      left: calc($item-size * var(--nested-index));
+      left: calc($node-size * var(--nested-index));
       top: 0;
       bottom: 0;
 
       border-left: 1px solid white;
-      margin-left: calc($item-size / 2);
+      margin-left: calc($node-size / 2);
       z-index: 10;
     }
   }
@@ -123,7 +121,7 @@ $item-size: 28px;
 
   99% {
     overflow: hidden;
-    max-height: calc($item-size * var(--items-count));
+    max-height: calc($node-size * var(--items-count));
   }
 
   100% {
@@ -135,7 +133,7 @@ $item-size: 28px;
 @keyframes close-list {
   0% {
     overflow: hidden;
-    max-height: calc($item-size * var(--items-count));
+    max-height: calc($node-size * var(--items-count));
   }
 
   100% {

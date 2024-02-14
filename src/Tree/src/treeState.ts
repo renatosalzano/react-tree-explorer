@@ -28,8 +28,9 @@ export class TreeState {
     if (root instanceof Array) {
       // init root
       this.root = {
-        label: "",
+        label: "/",
         path: "/",
+        isRoot: true,
         nestedIndex: 0,
         children: root.map((child) => {
           const n = this.resolveNode(child, "/");
@@ -40,11 +41,9 @@ export class TreeState {
     } else {
       // custom root
       this.root = this.resolveNode(root);
-      this.nodes[this.root.path] = this.root;
     }
 
-    console.log("this root", this)
-
+    this.nodes[this.root.path] = this.root;
 
     if (lock && this.getNode(lock)) {
       this.rootOffset = lock.split('/').length - 2;
@@ -56,14 +55,16 @@ export class TreeState {
     const n = { ...node } as NodeProps;
 
     if (parent) {
-      n.path = `${parent}/${n.label}`
+      n.path = parent === "/"
+        ? `/${n.label}`
+        : `${parent}/${n.label}`
     } else {
       // root node
       n.path = `/${n.label}`;
       n.isRoot = true;
     }
 
-    n.nestedIndex = n.path.split('/').length - 3;
+    n.nestedIndex = n.path.split('/').filter((x) => x).length - 1;
     n.active = false;
 
     if (typeof node.selfExpand === "boolean") {
@@ -204,7 +205,6 @@ export class TreeState {
   }
 
   getNode(path: string) {
-    console.log(path)
     return this.nodes[path]
   }
 

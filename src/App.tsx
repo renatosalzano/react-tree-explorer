@@ -1,3 +1,4 @@
+import { ResizableContainer } from './ResizableContainer/ResizableContainer';
 import { Tree, TreeEvents } from './Tree';
 import { treeData, buildTree } from './_data/faketree';
 import { useMounted } from './utils/lifecycle';
@@ -44,8 +45,13 @@ function App() {
   return (
     <div className="App">
       <main>
+        {/* <ResizableContainer>
+          <aside>
+            <p>usless children</p>
+          </aside>
+        </ResizableContainer> */}
         <aside>
-          <Tree root={Root} lock='/news/2020' />
+          <Tree root={treeData} view='folder' />
 
         </aside>
         <section>

@@ -1,0 +1,58 @@
+.tree--explorer {
+  .tree--explorer-header {
+    .explorer-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 16px;
+      margin-bottom: 8px;
+
+
+
+      .breadcrumb--separator {
+        display: block;
+      }
+
+    }
+
+  }
+}
+
+.folder-node {
+  display: flex;
+  flex-direction: column;
+
+  .folder-breadcrumb {
+    display: flex;
+    gap: 4px;
+
+    .breadcrumb-node {
+      display: flex;
+
+      .tree-element {
+        min-width: $node-size;
+
+        .node-label {
+          @include node-label(true);
+          padding: 0 4px;
+        }
+      }
+
+      .breadcrumb-btn {
+        width: $node-size;
+        height: $node-size;
+
+        &:hover {
+          background-color: $primary;
+        }
+      }
+
+      &[data-active=true] {
+        .tree-element .node-label {
+          color: $primary;
+          pointer-events: none;
+        }
+      }
+    }
+  }
+}

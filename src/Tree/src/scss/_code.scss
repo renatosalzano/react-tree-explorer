@@ -1,0 +1,16 @@
+@mixin flex($dir: "", $justify: "", $align: "") {
+  display: flex;
+  @debug $justify;
+
+  @if $dir !="" {
+    flex-direction: $dir;
+  }
+
+  @if $justify !="" {
+    justify-content: $justify;
+  }
+
+  @if $align !="" {
+    align-items: $align;
+  }
+}

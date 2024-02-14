@@ -1,14 +1,16 @@
-import React, { Dispatch, FC, Fragment, MutableRefObject, ReactElement, ReactNode, SetStateAction, createContext, createElement, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { TreeProps, TreeItem, NodeProps } from '../index';
+import { FC, MutableRefObject, createContext, useContext, useMemo, useRef, useState } from 'react';
+import type { TreeProps, NodeProps } from '../index';
 
 
 import { Node } from './Node';
 import { TreeState } from './treeState';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolder, faFolderTree, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
-import "./scss/index.scss";
+
 import { Button } from './components';
-import { ExplorerNode } from './ExplorerNode';
+import { FolderNode } from './FolderNode';
+import "./scss/style.scss";
+import { useMounted, useUnmounted } from '../../utils/lifecycle';
 
 const DEFAULT_ICONS = {
   branch: <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><path fill="currentColor" d="M216 74h-85.51l-27.9-27.9a13.94 13.94 0 0 0-9.9-4.1H40a14 14 0 0 0-14 14v144.62A13.39 13.39 0 0 0 39.38 214h177.51A13.12 13.12 0 0 0 230 200.89V88a14 14 0 0 0-14-14ZM40 54h52.69a2 2 0 0 1 1.41.59L113.51 74H38V56a2 2 0 0 1 2-2Zm178 146.89a1.11 1.11 0 0 1-1.11 1.11H39.38a1.4 1.4 0 0 1-1.38-1.38V86h178a2 2 0 0 1 2 2Z" /></svg>,
@@ -98,8 +100,6 @@ const Tree: FC<TreeProps> = ({
       _rootNode = getNode(lock);
     }
 
-    console.log("_rootNode", _rootNode);
-
     return _rootNode;
   }, [lock]);
 
@@ -112,6 +112,17 @@ const Tree: FC<TreeProps> = ({
     /* if (prevNode.current === node.path) return; */
     setCurrentNode(() => node);
   }
+
+  useMounted(() => {
+    const node = document.createElement("div");
+    node.id = "tree-root-overlay";
+    document.body.appendChild(node);
+  })
+
+  useUnmounted(() => {
+    const node = document.body.querySelector('#tree-root-overlay');
+    node && node.remove();
+  })
 
   const value: TreeContext = {
     view: _treeView,
@@ -138,7 +149,7 @@ const Tree: FC<TreeProps> = ({
             <Node key={rootNode.path} {...rootNode} isRoot />
           ) : (
             <div className="tree--explorer">
-              <ExplorerNode key={currentNode.path} {...currentNode} />
+              <FolderNode key={currentNode.path} {...currentNode} />
             </div>
           )
         }
