@@ -1,4 +1,4 @@
-import { FC, RefObject, createContext, useContext, useMemo, useRef, useState } from "react";
+import { FC, MouseEventHandler, RefObject, createContext, useContext, useMemo, useRef, useState } from "react";
 import { NodeProps } from "..";
 import { useMounted, useUnmounted } from "../../utils/lifecycle";
 import { Button } from "./components";
@@ -129,16 +129,43 @@ export const BreadcrumbItem: FC<NodeProps & {
   index: number,
   onClick: () => void
 }> = ({ index, path, label, active, children, onClick }) => {
+  const { overlay, getNode, setNode, selectNode } = useTreeContext();
   const { registerItem } = useBreadcrumbContext();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLLIElement>(null);
+
+
+  const showList: MouseEventHandler<HTMLButtonElement> = (event) => {
+    setOpen(true);
+    overlay.open(
+      <ul className="breadcrumb-dropdown list-unstyled">
+        {children
+          .filter(c => c.children)
+          .map(({ label, path }, index) => {
+            return (
+              <li key={`${index}-${label}-breadcrumb-item`} onClick={() => openNode(path)}>
+                {label}
+              </li>
+            )
+          })}
+      </ul>,
+      { target: (event.target as HTMLElement), position: ["bottom", "left"], closeCallback: () => setOpen(false) }
+    )
+  }
+
+  const openNode = (path: string) => {
+    setNode(path, { active: true });
+    selectNode(getNode(path));
+    overlay.close();
+  }
+
 
   useMounted(() => {
     registerItem(index, ref)
   })
 
   return (
-    <li ref={ref} className="breadcrumb-node tree-node" data-active={active} data-path={path}>
+    <li ref={ref} className="breadcrumb-node tree-node" data-active={active} data-overlay={path}>
       <div className='tree-element'>
         {/* <Checkbox checked={!!node.checked} onChange={onCheck} /> */}
         <Button
@@ -151,12 +178,10 @@ export const BreadcrumbItem: FC<NodeProps & {
       </div>
       <Button
         className="breadcrumb-btn"
+        onClick={showList}
       >
         {open ? <AngleDown /> : <AngleRight />}
       </Button>
-      {createPortal(
-        <div>sono una modale del cazzo</div>, document.body.querySelector("#tree-root-overlay"))
-      }
     </li>
   )
 }

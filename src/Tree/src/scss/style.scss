@@ -38,3 +38,22 @@
     list-style: none;
   }
 }
+
+#tree-root-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+
+  .portal-container {
+    position: relative;
+
+    &.bottom {
+      top: var(--target-bottom);
+    }
+
+    &.left {
+      left: var(--target-left);
+    }
+  }
+}

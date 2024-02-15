@@ -9,6 +9,11 @@ export class TreeState {
   };
   nodes: { [key: string]: NodeProps } = {};
 
+  overlay = {
+    open() { },
+    close() { }
+  }
+
   rootOffset = 0;
   checked: string[] = [];
   multicheck = false;
@@ -66,6 +71,7 @@ export class TreeState {
 
     n.nestedIndex = n.path.split('/').filter((x) => x).length - 1;
     n.active = false;
+    n.mounted = false;
 
     if (typeof node.selfExpand === "boolean") {
       n.selfExpand = {
@@ -100,6 +106,7 @@ export class TreeState {
 
     if (dispatch) {
       // mounted node
+      this.nodes[path].mounted = true;
 
       // update state fn
       this.nodes[path].update = (update: any) => {
@@ -155,6 +162,7 @@ export class TreeState {
 
     } else {
       // unmounted node
+      this.nodes[path].mounted = false;
 
       this.nodes[path].update = () => this.nodes[path];
     }

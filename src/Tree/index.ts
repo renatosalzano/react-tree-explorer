@@ -60,6 +60,7 @@ type NodeProps = Omit<NodeUpdate, "children" | "selfExpand"> & {
   isRoot?: boolean;
   children: NodeProps[];
   nestedIndex: number;
+  mounted: boolean;
   update(update: any): any;
   open(): void;
 }
